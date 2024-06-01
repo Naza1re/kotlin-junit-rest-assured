@@ -1,12 +1,10 @@
 package regres.crud
 
+import io.qameta.allure.Description
 import io.restassured.RestAssured.given
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import regres.crud.dto.BadRegister
-import regres.crud.dto.RegRequest
-import regres.crud.dto.RegisterResponse
-import regres.crud.dto.UserData
+import regres.crud.dto.*
 import regres.crud.specifications.Specifications
 
 class FirstCrudTest {
@@ -15,6 +13,7 @@ class FirstCrudTest {
         const val URL = "https://reqres.in"
     }
 
+    @Description("This is a test for checking the status code of the API")
     @Test
     fun testCreate() {
         val requestSpec = Specifications.requestSpecification(URL)
@@ -24,6 +23,7 @@ class FirstCrudTest {
             .`when`()
             .get("/api/users?page=2")
             .then()
+            .spec(responseSpec)
             .log().all()
             .extract()
             .body()
@@ -42,7 +42,7 @@ class FirstCrudTest {
 
     }
 
-
+    @Description("This is a test for checking the status code of the API")
     @Test
     fun testBadRegister() {
         val requestSpec = Specifications.requestSpecification(URL)
@@ -83,5 +83,27 @@ class FirstCrudTest {
         assertTrue(response.id==4)
         assertTrue(response.token=="QpwL5tke4Pnpja7X4")
     }
+
+    @Test
+    fun testSuccessfulLogin() {
+        val requestSpec = Specifications.requestSpecification(URL)
+        val responseSpec = Specifications.responseSpecificationOK200()
+
+        val regRequest = RegRequest("eve.holt@reqres.in","cityslicka")
+        val actual = given(requestSpec)
+            .body(regRequest)
+            .`when`()
+            .post("/api/login")
+            .then()
+            .spec(responseSpec)
+            .log().all()
+            .extract().body().`as`(TokenResponse::class.java)
+
+        assertTrue(actual.token=="QpwL5tke4Pnpja7X4")
+    }
+
+
+
+
 
 }
